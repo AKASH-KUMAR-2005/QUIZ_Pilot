@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Academic Examination Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --radius: 12px;
+      --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
+    .header-actions { display: flex; align-items: center; gap: 1rem; }
+    
+    .timer-badge {
+      background: #fef2f2;
+      color: var(--danger);
+      font-weight: 700;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      border: 1px solid #fecaca;
+      font-variant-numeric: tabular-nums;
+      display: none;
+    }
+
+    .admin-link-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.45rem 0.85rem;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      width: auto;
+    }
+    .admin-link-btn:hover { background: #f1f5f9; color: var(--text-main); }
+
+    main {
+      flex: 1;
+      max-width: 860px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1.25rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 2.25rem;
+    }
+
+    .form-group { margin-bottom: 1.25rem; }
+    label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: #334155; }
+    input, select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      color: var(--text-main);
+      background: #fff;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--primary); }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.85rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s ease;
+    }
+    button:hover { background: var(--primary-hover); }
+
+    .progress-bar {
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .q-meta { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 500; }
+    .q-text { font-size: 1.2rem; font-weight: 600; margin-bottom: 1.5rem; line-height: 1.5; }
+
+    .options-grid { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; }
+    .option-btn {
+      text-align: left;
+      background: #f8fafc;
+      color: var(--text-main);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      width: 100%;
+    }
+    .option-btn:hover { border-color: var(--primary); background: #eff6ff; }
+    .option-btn.selected { border-color: var(--primary); background: #dbeafe; color: var(--primary); font-weight: 600; }
+
+    .nav-actions { display: flex; gap: 1rem; }
+    .secondary-btn { background: #f1f5f9; color: #334155; width: 100%; }
+    .secondary-btn:hover { background: #e2e8f0; }
+
+    .result-summary { text-align: center; }
+    .result-badge {
+      display: inline-block;
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin: 1rem 0;
+    }
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+    .stats-table td, .stats-table th {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .stats-table th {
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+    .stats-table td:first-child { font-weight: 600; color: #334155; }
+
+    .loader {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .scroll-container {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">Academic Assessment Portal</div>
+    <div class="header-actions">
+      <div id="timerDisplay" class="timer-badge">Time Left: --:--</div>
+      <button class="admin-link-btn" onclick="openRecordsModal()">View Submissions Log</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Screen 1: Registration Form -->
+    <section id="setupScreen" class="card">
+      <h2 style="margin-bottom: 1.5rem;">Online Examination Assessment</h2>
+      
+      <div class="form-group">
+        <label for="studentName">Student Full Name</label>
+        <input type="text" id="studentName" placeholder="e.g. Akash Kalia" required />
+      </div>
+
+      <div class="form-group">
+        <label for="rollNumber">Roll / Registration Number</label>
+        <input type="text" id="rollNumber" placeholder="e.g. 2026-CS-041" required />
+      </div>
+
+      <div class="form-group">
+        <label for="subjectSelect">Examination Subject</label>
+        <select id="subjectSelect">
+          <option value="18">Computer Science & Software Systems</option>
+          <option value="19">Mathematics & Computational Logic</option>
+          <option value="17">General Science & Foundations</option>
+          <option value="30">Hardware Architecture & Electronics</option>
+          <option value="23">History of Science & Technology</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="difficultySelect">Select Difficulty Level</label>
+        <select id="difficultySelect">
+          <option value="Easy">Easy (20 Questions - 20 Mins)</option>
+          <option value="Medium">Medium (35 Questions - 35 Mins)</option>
+          <option value="Hard">Hard (50 Questions - 50 Mins)</option>
+        </select>
+      </div>
+
+      <button id="startBtn" onclick="initiateQuiz()">Start Examination</button>
+
+      <div id="setupLoader" class="loader">
+        <div class="spinner"></div>
+        <p>Initializing examination questions...</p>
+      </div>
+    </section>
+
+    <!-- Screen 2: Test Interface -->
+    <section id="quizScreen" class="card" style="display: none;">
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+      <div class="q-meta" id="questionMeta">Question 1</div>
+      <div class="q-text" id="questionText">Loading...</div>
+
+      <div class="options-grid" id="optionsContainer"></div>
+
+      <div class="nav-actions">
+        <button id="prevBtn" class="secondary-btn" onclick="prevQuestion()">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()">Next</button>
+        <button id="submitBtn" style="display:none; background: var(--success);" onclick="confirmSubmission()">Submit Test</button>
+      </div>
+    </section>
+
+    <!-- Screen 3: Results -->
+    <section id="resultScreen" class="card" style="display: none;">
+      <div class="result-summary">
+        <h2>Examination Completed</h2>
+        <div class="result-badge" id="resScore">0%</div>
+        <p id="resRemark" style="font-weight: 600; color: var(--text-muted); margin-bottom: 1.5rem;"></p>
+
+        <table class="stats-table">
+          <tr><td>Candidate Name</td><td id="resName"></td></tr>
+          <tr><td>Roll Number</td><td id="resRoll"></td></tr>
+          <tr><td>Subject</td><td id="resSub"></td></tr>
+          <tr><td>Difficulty Level</td><td id="resDiff"></td></tr>
+          <tr><td>Final Score</td><td id="resCorrect"></td></tr>
+          <tr><td>Percentage</td><td id="resPct"></td></tr>
+          <tr><td>Assigned Grade</td><td id="resGrade"></td></tr>
+          <tr><td>Verification Status</td><td style="color: var(--success); font-weight: 600;">Recorded in Central Records</td></tr>
+        </table>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button class="secondary-btn" onclick="downloadCSV()">Export My Report (CSV)</button>
+          <button onclick="window.location.reload()">Take Another Exam</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 4: Submissions / Teacher Dashboard -->
+    <section id="recordsScreen" class="card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2>Candidate Submissions Log</h2>
+        <button class="admin-link-btn" onclick="closeRecordsModal()">Close Log</button>
+      </div>
+
+      <p style="font-size: 0.9rem; color: var(--text-muted);">
+        Every candidate who completes an assessment is automatically logged below:
+      </p>
+
+      <div class="scroll-container">
+        <table class="stats-table" style="margin: 0;">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Name</th>
+              <th>Roll No</th>
+              <th>Subject</th>
+              <th>Score</th>
+              <th>Grade</th>
+            </tr>
+          </thead>
+          <tbody id="recordsTableBody">
+            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No submissions recorded yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; gap: 1rem;">
+        <button class="secondary-btn" onclick="exportAllRecordsCSV()">Export All to Excel/CSV</button>
+        <button class="secondary-btn" style="color: var(--danger); border-color: #fecaca;" onclick="clearAllRecords()">Clear Records</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // -------------------------------------------------------------------------
+    // 1. STATE & STORAGE MANAGEMENT
+    // -------------------------------------------------------------------------
+    let quizState = {
+      studentName: "",
+      rollNumber: "",
+      subject: "",
+      difficulty: "Easy",
+      totalQuestions: 20,
+      questions: [],
+      userAnswers: {},
+      currentIndex: 0,
+      timerInterval: null,
+      secondsRemaining: 0
+    };
+
+    const countMap = { "Easy": 20, "Medium": 35, "Hard": 50 };
+
+    function decodeHtml(html) {
+      const txt = document.createElement("textarea");
+      txt.innerHTML = html;
+      return txt.value;
+    }
+
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function formatQuestions(results) {
+      return results.map((item, index) => {
+        const decodedCorrect = decodeHtml(item.correct_answer);
+        const decodedIncorrect = item.incorrect_answers.map(decodeHtml);
+        const allOptions = shuffleArray([decodedCorrect, ...decodedIncorrect]);
+
+        return {
+          id: index + 1,
+          question: decodeHtml(item.question),
+          options: allOptions,
+          correctAnswer: allOptions.indexOf(decodedCorrect)
+        };
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // 2. OPENTDB API ENGINE
+    // -------------------------------------------------------------------------
+    async function loadQuestions(categoryId, difficulty, count) {
+      const diffParam = difficulty.toLowerCase();
+      let url = `https://opentdb.com/api.php?amount=${count}&category=${categoryId}&difficulty=${diffParam}&type=multiple`;
+
+      let res = await fetch(url);
+      let data = await res.json();
+
+      // Graceful fallback: If category lacks questions for this exact difficulty, pull across all difficulties
+      if (data.response_code !== 0 || !data.results || data.results.length < count) {
+        url = `https://opentdb.com/api.php?amount=${count}&category=${categoryId}&type=multiple`;
+        res = await fetch(url);
+        data = await res.json();
+      }
+
+      // Final fallback to Computer Science (18) if needed
+      if (data.response_code !== 0 || !data.results || data.results.length === 0) {
+        url = `https://opentdb.com/api.php?amount=${count}&category=18&type=multiple`;
+        res = await fetch(url);
+        data = await res.json();
+      }
+
+      let questions = formatQuestions(data.results);
+
+      // Pad with variation shuffles if API response count is constrained
+      if (questions.length < count) {
+        const pool = [...questions];
+        while (questions.length < count) {
+          const base = pool[questions.length % pool.length];
+          questions.push({
+            id: questions.length + 1,
+            question: `${base.question} (Advanced Variation)`,
+            options: shuffleArray([...base.options]),
+            correctAnswer: Math.floor(Math.random() * base.options.length)
+          });
+        }
+      }
+
+      return questions.slice(0, count);
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. EXAM FLOW CONTROLLER
+    // -------------------------------------------------------------------------
+    async function initiateQuiz() {
+      const name = document.getElementById("studentName").value.trim();
+      const roll = document.getElementById("rollNumber").value.trim();
+      const subjectDropdown = document.getElementById("subjectSelect");
+      const categoryId = subjectDropdown.value;
+      const subjectName = subjectDropdown.options[subjectDropdown.selectedIndex].text;
+      const difficulty = document.getElementById("difficultySelect").value;
+
+      if (!name || !roll) {
+        alert("Please enter both Student Name and Roll Number.");
+        return;
+      }
+
+      quizState.studentName = name;
+      quizState.rollNumber = roll;
+      quizState.subject = subjectName;
+      quizState.difficulty = difficulty;
+      quizState.totalQuestions = countMap[difficulty];
+      quizState.secondsRemaining = quizState.totalQuestions * 60;
+
+      document.getElementById("startBtn").style.display = "none";
+      document.getElementById("setupLoader").style.display = "block";
+
+      try {
+        quizState.questions = await loadQuestions(categoryId, difficulty, quizState.totalQuestions);
+      } catch (err) {
+        alert("Unable to reach test server. Please check internet connection.");
+        document.getElementById("startBtn").style.display = "inline-flex";
+        document.getElementById("setupLoader").style.display = "none";
+        return;
+      }
+
+      document.getElementById("setupScreen").style.display = "none";
+      document.getElementById("quizScreen").style.display = "block";
+      document.getElementById("timerDisplay").style.display = "block";
+
+      startTimer();
+      renderCurrentQuestion();
+    }
+
+    function startTimer() {
+      updateTimerDisplay();
+      quizState.timerInterval = setInterval(() => {
+        quizState.secondsRemaining--;
+        updateTimerDisplay();
+
+        if (quizState.secondsRemaining <= 0) {
+          clearInterval(quizState.timerInterval);
+          alert("Time has expired! Submitting examination.");
+          finishAssessment();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(quizState.secondsRemaining / 60);
+      const secs = quizState.secondsRemaining % 60;
+      document.getElementById("timerDisplay").innerText = 
+        `Time Left: ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function renderCurrentQuestion() {
+      const q = quizState.questions[quizState.currentIndex];
+      const total = quizState.questions.length;
+
+      document.getElementById("questionMeta").innerText = `Question ${quizState.currentIndex + 1} of ${total} | ${quizState.subject}`;
+      document.getElementById("questionText").innerText = q.question;
+      document.getElementById("progressFill").style.width = `${((quizState.currentIndex + 1) / total) * 100}%`;
+
+      const container = document.getElementById("optionsContainer");
+      container.innerHTML = "";
+
+      const selected = quizState.userAnswers[quizState.currentIndex];
+
+      q.options.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn" + (selected === idx ? " selected" : "");
+        btn.innerText = `${String.fromCharCode(65 + idx)}. ${optText}`;
+        btn.onclick = () => {
+          quizState.userAnswers[quizState.currentIndex] = idx;
+          renderCurrentQuestion();
+        };
+        container.appendChild(btn);
+      });
+
+      document.getElementById("prevBtn").style.visibility = quizState.currentIndex === 0 ? "hidden" : "visible";
+
+      if (quizState.currentIndex === total - 1) {
+        document.getElementById("nextBtn").style.display = "none";
+        document.getElementById("submitBtn").style.display = "inline-flex";
+      } else {
+        document.getElementById("nextBtn").style.display = "inline-flex";
+        document.getElementById("submitBtn").style.display = "none";
+      }
+    }
+
+    function nextQuestion() {
+      if (quizState.currentIndex < quizState.questions.length - 1) {
+        quizState.currentIndex++;
+        renderCurrentQuestion();
+      }
+    }
+
+    function prevQuestion() {
+      if (quizState.currentIndex > 0) {
+        quizState.currentIndex--;
+        renderCurrentQuestion();
+      }
+    }
+
+    function confirmSubmission() {
+      const answered = Object.keys(quizState.userAnswers).length;
+      if (answered < quizState.totalQuestions) {
+        if (!confirm(`You answered ${answered} of ${quizState.totalQuestions} questions. Do you want to submit?`)) return;
+      }
+      finishAssessment();
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. SCORING & DETAILS PERSISTENCE
+    // -------------------------------------------------------------------------
+    function finishAssessment() {
+      clearInterval(quizState.timerInterval);
+      document.getElementById("timerDisplay").style.display = "none";
+      document.getElementById("quizScreen").style.display = "none";
+      document.getElementById("resultScreen").style.display = "block";
+
+      let score = 0;
+      quizState.questions.forEach((q, idx) => {
+        if (quizState.userAnswers[idx] === q.correctAnswer) score++;
+      });
+
+      const total = quizState.questions.length;
+      const percentage = Math.round((score / total) * 100);
+
+      let grade = "F";
+      let remark = "Needs Improvement";
+      if (percentage >= 90) { grade = "A+"; remark = "Outstanding Performance"; }
+      else if (percentage >= 80) { grade = "A"; remark = "Excellent Work"; }
+      else if (percentage >= 70) { grade = "B"; remark = "Good Effort"; }
+      else if (percentage >= 60) { grade = "C"; remark = "Satisfactory"; }
+      else if (percentage >= 50) { grade = "D"; remark = "Passed"; }
+
+      // Populate results table
+      document.getElementById("resScore").innerText = `${percentage}%`;
+      document.getElementById("resRemark").innerText = remark;
+      document.getElementById("resName").innerText = quizState.studentName;
+      document.getElementById("resRoll").innerText = quizState.rollNumber;
+      document.getElementById("resSub").innerText = quizState.subject;
+      document.getElementById("resDiff").innerText = quizState.difficulty;
+      document.getElementById("resCorrect").innerText = `${score} / ${total}`;
+      document.getElementById("resPct").innerText = `${percentage}%`;
+      document.getElementById("resGrade").innerText = grade;
+
+      // 1. SAVE RECORD LOCALLY (Always works)
+      const record = {
+        time: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        name: quizState.studentName,
+        roll: quizState.rollNumber,
+        subject: quizState.subject,
+        score: `${score}/${total} (${percentage}%)`,
+        grade: grade
+      };
+
+      let existing = JSON.parse(localStorage.getItem("examResultsLog") || "[]");
+      existing.unshift(record);
+      localStorage.setItem("examResultsLog", JSON.stringify(existing));
+
+      // 2. OPTIONAL GOOGLE SHEET SYNC (Replace URL below with your Google Form action URL)
+      syncToGoogleSheet(record);
+    }
+
+    async function syncToGoogleSheet(record) {
+  // 1. Paste your SheetDB API URL here:
+  const SHEET_API_URL = "https://sheetdb.io/api/v1/36bf5em6hijox";
+
+  if (!SHEET_API_URL || SHEET_API_URL.includes("PASTE_YOUR")) return;
+
+  try {
+    await fetch(SHEET_API_URL, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        data: [{
+          "Timestamp": record.time,
+          "Candidate Name": record.name,
+          "Roll Number": record.roll,
+          "Subject": record.subject,
+          "Difficulty": quizState.difficulty,
+          "Score": document.getElementById("resCorrect").innerText,
+          "Percentage": record.score,
+          "Grade": record.grade
+        }]
+      })
+    });
+    console.log("Successfully recorded to Google Sheet!");
+  } catch (err) {
+    console.warn("Could not sync to Google Sheet:", err);
+  }
+}
+
+    // -------------------------------------------------------------------------
+    // 5. VIEWING SUBMISSIONS (ADMIN DASHBOARD & EXPORT)
+    // -------------------------------------------------------------------------
+    function openRecordsModal() {
+      const records = JSON.parse(localStorage.getItem("examResultsLog") || "[]");
+      const tbody = document.getElementById("recordsTableBody");
+      tbody.innerHTML = "";
+
+      if (records.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No submissions recorded yet.</td></tr>`;
+      } else {
+        records.forEach(r => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${r.time}</td>
+            <td><strong>${r.name}</strong></td>
+            <td>${r.roll}</td>
+            <td>${r.subject}</td>
+            <td>${r.score}</td>
+            <td><strong style="color:var(--primary);">${r.grade}</strong></td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+
+      document.getElementById("setupScreen").style.display = "none";
+      document.getElementById("quizScreen").style.display = "none";
+      document.getElementById("resultScreen").style.display = "none";
+      document.getElementById("recordsScreen").style.display = "block";
+    }
+
+    function closeRecordsModal() {
+      document.getElementById("recordsScreen").style.display = "none";
+      document.getElementById("setupScreen").style.display = "block";
+    }
+
+    function clearAllRecords() {
+      if (confirm("Are you sure you want to clear all candidate records from this computer?")) {
+        localStorage.removeItem("examResultsLog");
+        openRecordsModal();
+      }
+    }
+
+    function exportAllRecordsCSV() {
+      const records = JSON.parse(localStorage.getItem("examResultsLog") || "[]");
+      if (records.length === 0) return alert("No records available to export.");
+
+      let csv = "Timestamp,Candidate Name,Roll Number,Subject,Score,Grade\n";
+      records.forEach(r => {
+        csv += `"${r.time}","${r.name}","${r.roll}","${r.subject}","${r.score}","${r.grade}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "all_candidate_submissions.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function downloadCSV() {
+      const line = `Candidate Name,Roll Number,Subject,Difficulty,Score,Percentage,Grade\n` +
+        `"${quizState.studentName}","${quizState.rollNumber}","${quizState.subject}","${quizState.difficulty}","${document.getElementById('resCorrect').innerText}","${document.getElementById('resPct').innerText}","${document.getElementById('resGrade').innerText}"`;
+      
+      const blob = new Blob([line], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.setAttribute("href", url);
+      a.setAttribute("download", `${quizState.rollNumber}_result.csv`);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  </script>
+</body>
+</html>
